@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 
-# This script transforms the CSV files downloaded by `fetch-uk-cat-classifications.sh` into a JSON object which serves as an efficient lookup for classifications for organisations. This can then be used in the pipeline to rapidly append classifications to organisations.
+# This script transforms the CSV files downloaded by `fetch-uk-cat-classifications.sh` into two intermediate CSV files which can then be using csvstack and transformed into an efficient lookup using jq.
 
 # It depends on the presence of the four files in `pipeline/source_data/uk-cat`. If these don't exist yet, run `fetch-uk-cat-classifications.sh` before this.
 
-destination_dir="pipeline/intermediate_data"
+destination_dir="pipeline/intermediate_data/org-classifications"
 source_data_dir="pipeline/source_data/uk-cat"
 filter_file="scripts/jq/ukcat-input-to-classifications-lookup.jq"
 
 mkdir -p "$destination_dir"
 
+# For UK-CAT codes, We want the default inner join behaviour of csvjoin because otherwise we get blank rows, which are for codes which haven't been mapped to organisations.
 
-# For each classification, we want both the code and the human-readable title. So join the classification codelist onto the file which maps it to org-ids. We want the default inner join behaviour because otherwise we get blank rows, which are for codes which haven't been mapped to organisations.
-# Then we want to massage that into a nicer shape by cutting out a lot of the columns we don't need, and then sending it on to csvjson where it can be transformed into the shape we need via jq
+csvjoin --columns "ukcat_code,Code" "$source_data_dir/charities_active-ukcat.csv" "$source_data_dir/ukcat.csv" | csvsql --query "SELECT org_id, ukcat_code AS code, tag AS description, 'UK-CAT' AS scheme, 'https://charityclassification.org.uk/data/tag_list/' AS uri FROM stdin;" > "$destination_dir/uk-cat-to-org-id-mappings-with-descriptions.csv"
 
-# Note: we're currently omitting the icnptso codes provided by UK-CAT. This is because it's unclear how important they are to our priorities at this time and it might be a faff to create a clean pipeline to ensure that all the classifications get added properly in the lookup
+# ICNTPSO Codes are organised taxonomically with groups and subgroups. In the file which maps org-ids to ICNPTSO codes, there's just one code per line. This has the following implications:
+# 1) We need to do a full Left Outer Join to avoid omitting rows which don't map to either the category or subcategory codes
+# 2) We need to do multiple passes to get descriptions for every code
 
-csvjoin --columns ukcat_code,Code "$source_data_dir/charities_active-ukcat.csv" "$source_data_dir/ukcat.csv" | csvcut --columns org_id,ukcat_code,tag | csvjson | jq -c --from-file "$filter_file" > "$destination_dir/uk-cat-classifications.json"
+csvjoin --left --columns icnptso_code,Group "$source_data_dir/charities_active-icnptso.csv" "$source_data_dir/icnptso.csv" | csvcut --columns "org_id,icnptso_code,Title" | csvjoin --left --columns "icnptso_code,Sub-group" - "$source_data_dir/icnptso.csv" | csvsql --query "SELECT org_id, icnptso_code AS code, COALESCE(Title, Title2) as description,'ICNTPSO' as scheme, 'https://unstats.un.org/unsd/publication/seriesf/seriesf_91e.pdf' AS uri FROM stdin;" > "$destination_dir/uk-cat-icnptso-mappings-with-descriptions.csv"
