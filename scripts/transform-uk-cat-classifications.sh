@@ -6,16 +6,18 @@
 
 destination_dir="pipeline/intermediate_data/org-classifications"
 source_data_dir="pipeline/source_data/uk-cat"
-filter_file="scripts/jq/ukcat-input-to-classifications-lookup.jq"
+uk_cat_sql_query="scripts/sql/convert-uk-cat-csv-to-shared-classification-format.sql"
+icnptso_sql_query="scripts/sql/convert-uk-cat-icnptso-csv-to-shared-classification-format.sql"
 
 mkdir -p "$destination_dir"
 
 # For UK-CAT codes, We want the default inner join behaviour of csvjoin because otherwise we get blank rows, which are for codes which haven't been mapped to organisations.
 
-csvjoin --columns "ukcat_code,Code" "$source_data_dir/charities_active-ukcat.csv" "$source_data_dir/ukcat.csv" | csvsql --query "SELECT org_id, ukcat_code AS code, tag AS description, 'UK-CAT' AS scheme, 'https://charityclassification.org.uk/data/tag_list/' AS uri FROM stdin;" > "$destination_dir/uk-cat-to-org-id-mappings-with-descriptions.csv"
+csvjoin --columns "ukcat_code,Code" "$source_data_dir/charities_active-ukcat.csv" "$source_data_dir/ukcat.csv" | csvsql --query "$uk_cat_sql_query" > "$destination_dir/uk-cat-to-org-id-mappings-with-descriptions.csv"
 
 # ICNTPSO Codes are organised taxonomically with groups and subgroups. In the file which maps org-ids to ICNPTSO codes, there's just one code per line. This has the following implications:
 # 1) We need to do a full Left Outer Join to avoid omitting rows which don't map to either the category or subcategory codes
 # 2) We need to do multiple passes to get descriptions for every code
+# 3) We need to handle the fact that we will have two "Title" columns due to the multiple passes. This is handled specifically by the SQL query inside of $icnptso_sql_query
 
-csvjoin --left --columns icnptso_code,Group "$source_data_dir/charities_active-icnptso.csv" "$source_data_dir/icnptso.csv" | csvcut --columns "org_id,icnptso_code,Title" | csvjoin --left --columns "icnptso_code,Sub-group" - "$source_data_dir/icnptso.csv" | csvsql --query "SELECT org_id, icnptso_code AS code, COALESCE(Title, Title2) as description,'ICNTPSO' as scheme, 'https://unstats.un.org/unsd/publication/seriesf/seriesf_91e.pdf' AS uri FROM stdin;" > "$destination_dir/uk-cat-icnptso-mappings-with-descriptions.csv"
+csvjoin --left --columns icnptso_code,Group "$source_data_dir/charities_active-icnptso.csv" "$source_data_dir/icnptso.csv" | csvcut --columns "org_id,icnptso_code,Title" | csvjoin --left --columns "icnptso_code,Sub-group" - "$source_data_dir/icnptso.csv" | csvsql --query "$icnptso_sql_query" > "$destination_dir/uk-cat-icnptso-mappings-with-descriptions.csv"
