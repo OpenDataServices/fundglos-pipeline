@@ -9,7 +9,7 @@ You should have the following packages in your environment:
 
 * psql
 * jq
-* csvkit (specifically csvcut, csvjoin, and csvjson)
+* csvkit
 * curl
 
 ### Datastore Access
