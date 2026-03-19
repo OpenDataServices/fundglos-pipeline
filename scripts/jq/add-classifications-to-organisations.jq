@@ -15,7 +15,7 @@ def get_classifications($org; $lookup):
 	| map(select(. != null)) # Remove any potentially null identifiers
 	| map($lookup[.] // []) # Returns an empty array if no match found
 	| add
-	| unique # Remove duplicate identifiers. It's unlikely, but if more mapping sources become available then we'll want to handle this.
+#	| unique # Remove duplicate identifiers. This is costly processing.
 ;
 
 
