@@ -5,8 +5,8 @@
 # It uses environment variables to control access to the postgres instance inside the datastore. So make sure you've sourced your `.env` file properly!
 
 destination_dir="pipeline/source_data/threesixtygiving-datastore"
-#query_file="scripts/sql/360g-datastore-extract-grants-and-additional-data-with-location-in-gloucestershire.sql"
-query_file="scripts/sql/test-with-limited-grants.sql"
+query_file="scripts/sql/360g-datastore-extract-grants-and-additional-data-with-location-in-gloucestershire.sql"
+#query_file="scripts/sql/test-with-limited-grants.sql"
 
 mkdir -p "$destination_dir"
 
