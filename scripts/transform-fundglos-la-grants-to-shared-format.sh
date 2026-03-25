@@ -7,7 +7,7 @@
 
 transform_script="scripts/python/transform-fundglos-la-grants-to-flattened-shared-format.py"
 flattened_output_dir="pipeline/intermediate_data/fundglos-local-authority-grants"
-jsonl_output_dir="pipeline_intermediate_data/mapped-funding-data"
+jsonl_output_dir="pipeline/intermediate_data/mapped-funding-data"
 
 mkdir -p "$flattened_output_dir"
 mkdir -p "$jsonl_output_dir"
