@@ -5,12 +5,12 @@
 .[] | 
 select(.latest_income != null) |
 ["GB-CHC-\(.registered_charity_number)", 
-	( if .latest_income < 10000 then "Micro"
-	  elif .latest_income >= 10000 and .latest_income < 100000 then "Small"
-	  elif .latest_income >= 100000 and .latest_income < 1000000 then "Medium"
-	  elif .latest_income >= 1000000 and .latest_income < 10000000 then "Large"
-	  elif .latest_income >= 10000000 and .latest_income < 100000000 then "Major"
-	  elif .latest_income >= 100000000 then "Super-major"
+	( if .latest_income < 10000 then "Micro","Less than £10000"
+	  elif .latest_income >= 10000 and .latest_income < 100000 then "Small","£10000 to £100000"
+	  elif .latest_income >= 100000 and .latest_income < 1000000 then "Medium","£100000 to £1m"
+	  elif .latest_income >= 1000000 and .latest_income < 10000000 then "Large","£1m to £10m"
+	  elif .latest_income >= 10000000 and .latest_income < 100000000 then "Major","£10m to £100m"
+	  elif .latest_income >= 100000000 then "Super-major","More than £100m"
 	  else "Unknown"
 	  end ),
 "NCVO Income Size",
