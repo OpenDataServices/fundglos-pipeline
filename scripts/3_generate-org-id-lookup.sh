@@ -9,8 +9,10 @@
 # We write this output to disk because csvgrep reserves STDIN for the actual csvdata that it's processing, and uses the --file flag to tell it which file to use for the matches.
 
 mapped_funding_data_directory="./pipeline/intermediate_data/mapped-funding-data"
-list_of_unique_org_names_destination_file="./pipeline/intermediate_data/organisation-identifiers/list-of-unique-org-names-in-dataset.txt"
+org_id_directory="./pipeline/intermediate_data/organisation-identifiers"
+list_of_unique_org_names_file="./pipeline/intermediate_data/organisation-identifiers/list-of-unique-org-names-in-dataset.txt"
 
+mkdir -p "$org_id_directory"
 
 # Pre-Processing
 # ======================
@@ -26,7 +28,7 @@ fi
 # Get the list of unique org names. Use tr to convert to uppercase
 echo "Generating list of unique org names from mapped data…"
 
-cat "$mapped_funding_data_directory/"*.jsonl | jq -r '.recipient.name, .funder.name' | tr '[:lower:]' '[:upper:]' | sort --unique > "$list_of_unique_org_names_destination_file"
+cat "$mapped_funding_data_directory/"*.jsonl | jq -r '.recipient.name, .funder.name' | tr '[:lower:]' '[:upper:]' | sort --unique > "$list_of_unique_org_names_file"
 
 
 # Generate org-id lookup CSV files from various sources
@@ -41,7 +43,7 @@ charity_commission_datafile="./pipeline/source_data/charity-commission/publicext
 charity_commission_conversion_filter="./scripts/jq/charity-commission-to-org-id-csv-file.jq"
 charity_commission_org_id_csv_file="./pipeline/intermediate_data/organisation-identifiers/charity-commission-identifiers.csv"
 
-jq --raw-output --from-file "$charity_commission_conversion_filter" "$charity_commission_datafile" | csvgrep --columns "name" --file "$list_of_unique_org_names_destination_file" > "$charity_commission_org_id_csv_file"
+jq --raw-output --from-file "$charity_commission_conversion_filter" "$charity_commission_datafile" | csvgrep --columns "name" --file "$list_of_unique_org_names_file" > "$charity_commission_org_id_csv_file"
 
 # Get a list of org-ids from our own dataset. No filtering needed because all orgs are, by their nature, in the dataset already.
 
@@ -66,7 +68,7 @@ cat "$mapped_funding_data_directory"/*.jsonl | jq --raw-output --from-file "$map
 
 echo "Combining all CSV lookups into a single file, removing duplicate rows…"
 
-csvstack "./pipeline/intermediate_data/organisation-identifiers/"*.csv | csvsql --query "SELECT DISTINCT * FROM stdin;" > "$combined_data_org_id_csv_file"
+csvstack "./pipeline/intermediate_data/organisation-identifiers"/*.csv | csvsql --query "SELECT DISTINCT * FROM stdin;" > "$combined_data_org_id_csv_file"
 
 echo "Converting combined CSV lookup into a JSONL file for enriching funding data…"
 jsonl_lookup_file="./pipeline/intermediate_data/organisation-identifiers/org-id-lookup.jsonl"
