@@ -1,0 +1,53 @@
+# This filter is designed to take input from the shared model of funding opportunities and then append organisation identifiers (specifically GB-CHC identifiers) to those without them, via a lookup which has been generated previously
+# It depends on running jq with `--slurpfile identifiers $identifiers_file` where $identifiers_file is a JSONL file and the result of creating the list of uppercase names mapped to organisation identifiers in the preparation stage.
+# It will output a new list of funding opportunities with the appended data
+
+# ===========================
+# Helper Functions
+# ===========================
+
+# ===========================
+# Main Pipeline
+# ===========================
+
+# Build the lookup table here so its available in context. There might be collisions, which will result in jq using the last value it encounters there
+
+($identifiers | map({key: .name, value: .org_id}) | from_entries) as $lookup |
+
+. | 
+
+# We do the same processing twice, once for recipients and once for funders.
+
+if (.recipient.name != "Recipient Individual" and (.recipient.identifier == null or .recipient.identifier.scheme != "GB-CHC")) then
+	# Lookup the org ID using the name (convert to uppercase to match the lookup file)
+	$lookup[.recipient.name | ascii_upcase] as $org_id |
+
+	if $org_id != null then
+		# Build the GB-CHC identifier using the found data
+		.recipient.identifier += {id: $org_id, scheme: "GB-CHC", identifier: ($org_id | split("-")[-1])} 
+	else
+		# No match found, leave intact
+		.
+	end
+  else 
+  	. # Leave recipients with GB-CHC identifiers intact
+  end
+
+# Perform the same process for funders.
+# The following is commented out because some sources don't include the actual funder name for some reason…
+#| # Perform the same process for the funders…
+#
+#if (.funder.identifier == null or .funder.identifier.scheme != "GB-CHC") then
+#	# Lookup the org ID using the name (convert to uppercase to match the lookup file)
+#	$lookup[.funder.name | ascii_upcase] as $org_id |
+#
+#	if $org_id != null then
+#		# Build the GB-CHC identifier using the found data
+#		.funder.identifier += {id: $org_id, scheme: "GB-CHC", identifier: ($org_id | split("-")[-1])} 
+#	else
+#		# No match found, leave intact
+#		.
+#	end
+#  else 
+#  	. # Leave funders with GB-CHC identifiers intact
+#  end
