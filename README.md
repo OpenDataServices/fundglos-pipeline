@@ -3,40 +3,23 @@ A basic data pipeline supporting analysis of grants and procurements, originally
 
 ## Usage
 
-At the present moment you will need to run each script individually to fetch and transform various pieces. Eventually this will be replaced by a wrapper script which should build the entire pipeline.
+Make sure you set up your `.env` file properly.
 
-Run each script from the root directory of this repo, as they assume this when writing output.
+You can run each script at the top-level of the `scripts` directory, in the order that they are named.
 
-The scripts will create a `pipeline` directory with three subdirectories:
+The scripts have been designed as if they are being run from the root directory of this repo. E.g.
 
-* `source_data`: data fetched from elsewhere, generally in the format that it was fetched in
-* `intermediate_data`: various bits of "cleaned" or "remapped" data go here, ready to be combined
-* `output_data`: the final output. This should really only be a single .jsonl file representing the combined output of the sources after they have been enriched. There may also be some metrics placed here.
+```bash
+./scripts/1_fetch-source-data.sh
+./scripts/2_transform-source-data-to-shared-format.sh
+# etc..
+```
 
-## Step 1: Get data from sources and remap it
+You could even run the entire pipeline with bash globbing… since the scripts are named for the order that you would need to run them.
 
-In general, each source will have a transform and a map script
-
-1. `.scripts/fetch-fundglos-local-authority-grant-data.sh`
-2. `.scripts/fetch-threesixtygiving-datastore-grants.sh` This one takes a while
-3. `.scripts/transform-datastore-grants-to-shared-format.sh`
-4. `.scripts/transform-fundglos-la-grants-to-shared-format.sh`
-
-etc.
-
-## Step 2: Enrich with classifications
-
-Enriching with classifications is done by fetching some classification mappings from UK-CAT and then generating a classifications lookup file. Using this, the transformed data from each source is then passed through this lookup to append any classifications based on known identifiers in the mapped data.
-
-Lookups like this are expensive and grow more expensive the larger the lookup table gets, so it is important to understand that the source data should be fetched and transformed *BEFORE* the classification is compiled. This is because we can get a list of unique org-ids from the dataset and use that to pre-filter the UK-CAT mappings so that only the ones for organisations we have make it into the lookup.
-
-This will take the final compile time down from 3.6 hours to a matter of seconds or minutes (the time will grow the more grants/procurements we have)
-
-1. `.scripts/fetch-uk-cat-classifications.sh`
-2. `.scripts/get-list-of-org-ids-from-dataset.sh`
-3. `.scripts/transform-uk-cat-classifications.sh`
-4. `.scripts/compile-org-id-classification-lookup.sh`
-5. `.scripts/add-org-classifications-to-funding-opportunities-from-lookup.sh` Final Step! This one takes a while
+```bash
+./scripts/*.sh
+```
 
 ## Step 3: Final transforms and/or uploading elsewhere
 
