@@ -21,7 +21,12 @@ cp "$enriched_data" "$final_data"
 
 # Flatten tool is silly and doesn't like JSONL, so we need to create a version of this which is in an array
 
-echo "Preparing data for flattening (this can take a while)…"
+echo "Preparing data for flattening…"
 
-funding_data_in_array="./pipeline/output_data/funding-data-in-array-for-flattening.json"
-jq --slurpfile funding "$final_data" '{main: $funding}' > "$funding_data_in_array"
+jq --slurp '{funding: .}' "$final_data" > "./pipeline/output_data/funding-data-in-array.json"
+
+echo "Flattening data into Excel, LibreOffice, and CSV files (this can take a while for larger datasets)…"
+
+cd "./pipeline/output_data" # This is a dirty hack, but flatten-tool's interface is a bit meh and this is faster. TODO
+
+flatten-tool flatten --main-sheet-name "funding_opportunities" --root-list-path "funding" --output-format all funding-data-in-array.json
