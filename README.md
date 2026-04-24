@@ -21,22 +21,6 @@ You could even run the entire pipeline with bash globbing… since the scripts a
 ./scripts/*.sh
 ```
 
-## Step 3: Final transforms and/or uploading elsewhere
-
-Now you will have a single (large) file of all the data inside of `pipeline/output_data/funding-data.jsonl`.
-
-You can use it how you want, but it is designed to be flattened and fed to a DeepNote notebook for analysis/visualisation:
-
-```bash
-# Inside pipeline/output_data
-
-# flatten-tool doesn't like JSONL and instead wants things to be inside an array
-jq --slurp '{funding: .}' funding-data.jsonl > funding-data-in-array.json
-
-# This will take a little while for lots of data
-flatten-tool flatten --main-sheet-name "funding_opportunities" --root-list-path "funding" --output-format all funding-data-in-array.json
-```
-
 ## Requirements
 
 ### Packages
