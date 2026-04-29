@@ -49,9 +49,14 @@ curl "https://raw.githubusercontent.com/charity-classification/ukcat/refs/heads/
 
 echo "Fetching manually produced grant data for the FundGlos project…"
 
-fundglos_gsheets_url="https://docs.google.com/spreadsheets/d/1L3T2weYA6tK7eaqEKaPstEBtoB3F6X8sLRZTgo2vigw/export?format=xlsx"
+fundglos_la_data_url="https://docs.google.com/spreadsheets/d/1L3T2weYA6tK7eaqEKaPstEBtoB3F6X8sLRZTgo2vigw/export?format=xlsx"
 
-curl -L "$fundglos_gsheets_url" -o "$fundglos_dir/local-authority-grants.xlsx"
+curl -L "$fundglos_la_data_url" -o "$fundglos_dir/local-authority-grants.xlsx"
+
+fundglos_gcf_summerfield_url="https://docs.google.com/spreadsheets/d/16lCoPYNAVuor3efXosbgYr9wQ-M2I0AOgpa0jvtdyWo/export?format=csv"
+
+curl -L "$fundglos_gcf_summerfield_url" -o "$fundglos_dir/gcf-summerfield-grants.csv"
+
 
 # Fetch Threesixty Giving Datastore data
 # ===========================================
