@@ -54,7 +54,7 @@ id: .grant_id,
 type: "grant",
 date: .data.awardDate,
 value: {amount: .data.amountAwarded, currency: .data.currency},
-uri: "https://grantnav.threesixtygiving.org/grant/\(.data.id)",
+uri: "https://grantnav.threesixtygiving.org/grant/\(.data.id | rtrimstr(" "))", # Some ids have trailing spaces apparently
 
 # In 360Giving, .grantProgramme is an array. This is likely to model cases where a grant belongs to more than one programme of work. As of 2026-03-19, the source data extracted from the 360Giving datastore contains no grants with more than one programme. I made a decision to reduce complication in the cleaned data by only taking the first entry in the .grantProgramme array here. If this changes, the job is just to use an array constructor and build a new object for each Grant Programme found in the source grant.
 programme: {id: .data.grantProgramme[0].code, title: .data.grantProgramme[0].title, description: .data.grantProgramme[0].description, uri: .data.grantProgramme[0].url},

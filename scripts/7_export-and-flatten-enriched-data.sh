@@ -4,15 +4,20 @@
 
 mkdir -p "./pipeline/output_data"
 
-# Copy data
+
+# Final Stage of Filtering: remove nulls
 # ===========================================
-# Copy the enriched data to the output directory
+# There's a bunch of nulls in the data which causes schema errors and potentially some analysis errors later.
+
 
 enriched_data="./pipeline/intermediate_data/enriched-data/funding-with-org-ids-and-classifications.jsonl"
 final_data="./pipeline/output_data/funding-data.jsonl"
+remove_null_jq_filter="./scripts/jq/remove-null-properties.jq"
 
-echo "Copying final enriched data (with org-ids and classifications) to the output_data directory"
-cp "$enriched_data" "$final_data"
+
+echo "Tidying up data (removing null values) and copying enriched data (classifications + identiers) to the output_data directory…"
+jq --compact-output --from-file "$remove_null_jq_filter" "$enriched_data" > "$final_data"
+
 
 
 # Flatten Data

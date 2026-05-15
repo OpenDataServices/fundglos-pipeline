@@ -1,9 +1,39 @@
 {
-  "$id": "",
+  "$id": "https://fundglos.org/funding-opportunity-schema.json",
   "$schema": "http://json-schema.org/draft/2020-12/schema",
   "title": "Fundglos Funding Opportunity Schema",
   "type": "object",
   "$defs": {
+    "Classification": {
+      "type": "object",
+      "properties": {
+        "scheme": {
+          "type": "string",
+          "name": "Scheme",
+          "description": "The scheme or vocabulary used for this classification"
+        },
+        "description": {
+          "type": "string",
+          "name": "Description",
+          "description": "Human-Readable value of the classification value or scheme, if available"
+        },
+        "value": {
+          "type": "string",
+          "name": "Value",
+          "description": "The value of the classification taken from the vocabulary or scheme"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "name": "URI",
+          "description": "A URI pointing to more information about this classification or classification scheme"
+        }
+      },
+      "required": [
+        "scheme",
+        "value"
+      ]
+    },
     "Identifier": {
       "type": "object",
       "properties": {
@@ -626,6 +656,9 @@
         }
       ]
     },
+    "value": {
+      "$ref": "#/$defs/Value"
+    },
     "uri": {
       "title": "URI",
       "type": "string",
@@ -637,6 +670,20 @@
     },
     "activity": {
       "$ref": "#/$defs/Activity"
+    },
+    "funder": {
+      "$ref": "#/$defs/Organisation"
+    },
+    "recipient": {
+      "$ref": "#/$defs/Organisation"
     }
-  }
+  },
+  "required": [
+    "id",
+    "type",
+    "date",
+    "value",
+    "funder",
+    "recipient"
+  ]
 }

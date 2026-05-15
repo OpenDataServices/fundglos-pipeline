@@ -47,6 +47,26 @@ def fy_map(row):
     else:
         return ''
 
+
+def generate_recipient_id(row):
+    """
+    Generates a recipient id to meet the schema, based on the funder name and the recipient name
+
+    return: string, the recipient id
+    """
+
+    if pd.isna(row['recipient/id']) or row['recipient/id'] == "":
+        # can only generate if we have a recipient name
+
+        if pd.notna(row['recipient/name']) and row['recipient/name'] != "":
+            funder_slug = str(row['funder/name'])
+            recipient_slug = str(row['recipient/name'])
+
+            return f"fundglos-{funder_slug}-{recipient_slug}".lower().replace(" ", "-")
+
+    # Returns if there is a recipient id present
+    return row['recipient/id']
+
 # ==================================
 # Mappings
 # ==================================
@@ -100,7 +120,7 @@ gloucestershire_CC_funding = {
     "funder/identifier/id": ["GB-GOR-GLS"] * len(gloucestershire_CC),
     "funder/identifier/scheme": ["GB-GOR"] * len(gloucestershire_CC),
     "funder/identifier/identifier": ["GLS"] * len(gloucestershire_CC),
-    "recipient/id":	'',
+    "recipient/id": "",
     "recipient/name": gloucestershire_CC['Grant Beneficiary'],	
     "recipient/location/ewcd":'',	
     "recipient/location/ewnm":	'',
@@ -780,7 +800,7 @@ all_data_df=pd.concat([
     ], ignore_index = True)
 
 
-# Isabel/Pandas has done the hard work by converting nasty dates into a common format. However, we want ISO 8601 strings. This is basically the default date but with a "T" separator.
+# Isabel/Pandas has done the hard work by converting nasty dates into a common format. However, we want ISO 8601 strings. This is basically the default date but with a "T" separator and a "Z" suffix for the timezone
 # We could interfere with this at the source mappings, but this would get tough to maintain if the mappings were ever adjusted. Instead, let's manipulate the date column on our new concatanated dataset.
 
 # The 'date' column is currently stored as strings, not datetime objects which we need. There are also a few null entries so we need to do some massaging here
@@ -791,7 +811,12 @@ all_data_df['date'] = pd.to_datetime(all_data_df['date'], errors='coerce', yearf
 
 # 2. Convert all of the dates to ISO 8601
 
-all_data_df['date'] = all_data_df['date'].dt.strftime('%Y-%m-%dT%H:%M:%S')
+all_data_df['date'] = all_data_df['date'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+
+
+# 3. Generate some recipient ids for those who don't have them, as they are a required field:
+
+all_data_df['recipient/id'] = all_data_df.apply(generate_recipient_id, axis=1)
 
 # Here we pass csv.QUOTE_ALL to enforce quoting of every column, otherwise the resulting file is very messy with strings spanning lots of columns.
 
