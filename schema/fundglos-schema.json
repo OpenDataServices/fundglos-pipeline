@@ -1,0 +1,642 @@
+{
+  "$id": "",
+  "$schema": "http://json-schema.org/draft/2020-12/schema",
+  "title": "Fundglos Funding Opportunity Schema",
+  "type": "object",
+  "$defs": {
+    "Identifier": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "",
+          "description": ""
+        },
+        "identifier": {
+          "type": "string",
+          "title": "",
+          "description": ""
+        },
+        "scheme": {
+          "type": "string",
+          "title": "Scheme",
+          "description": "The organisation identifier scheme",
+          "example": "GB-CHC"
+        },
+        "uri": {
+          "type": "string",
+          "title": "",
+          "description": "",
+          "format": "uri"
+        }
+      },
+      "required": [
+        "identifier",
+        "scheme"
+      ]
+    },
+    "Organisation": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "Id",
+          "description": "The array identifier for the organization object, this might be the same as or different to the organization identifier."
+        },
+        "name": {
+          "type": "string",
+          "title": "Name",
+          "description": "The name of the organisation"
+        },
+        "identifier": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "additionalIdentifiers": {
+          "type": "array",
+          "title": "Additional Identifiers",
+          "description": "A list of additional identifiers to support cross-referencing if needed",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          }
+        },
+        "classifications": {
+          "type": "array",
+          "title": "Classifications",
+          "description": "A list of Classification objects used to tag or categorise the organisation",
+          "items": {
+            "$ref": "#/$defs/Classification"
+          }
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        }
+      },
+      "required": [
+        "id",
+        "name"
+      ]
+    },
+    "Location": {
+      "type": "object",
+      "title": "Location",
+      "description": "A Location",
+      "properties": {
+        "ukcd": {
+          "title": "UK Code",
+          "format": "string",
+          "description": "ONS code for the United Kingdom",
+          "example": "K02000001"
+        },
+        "uknm": {
+          "title": "UK Name",
+          "format": "string",
+          "description": "Name of the nation",
+          "example": "United Kingdom"
+        },
+        "gbcd": {
+          "title": "Great Britain Code",
+          "format": "string",
+          "description": "ONS code for Great Britain (England, Scotland, Wales)",
+          "example": "K03000001"
+        },
+        "gbnm": {
+          "title": "Great Britain Name",
+          "format": "string",
+          "description": "Name of the supra-national entity",
+          "example": "Great Britain"
+        },
+        "ewcd": {
+          "title": "England & Wales Code",
+          "format": "string",
+          "description": "ONS code for England and Wales combined",
+          "example": "K04000001"
+        },
+        "ewnm": {
+          "title": "England & Wales Name",
+          "format": "string",
+          "description": "Name of the combined entity",
+          "example": "England and Wales"
+        },
+        "ctrycd": {
+          "title": "Country Code",
+          "format": "string",
+          "description": "ONS code for the constituent country",
+          "example": "E92000001"
+        },
+        "ctrynm": {
+          "title": "Country Name",
+          "format": "string",
+          "description": "Name of the constituent country",
+          "example": "England"
+        },
+        "rgncd": {
+          "title": "Region Code",
+          "format": "string",
+          "description": "ONS code for the Government Office Region",
+          "example": "E12000009"
+        },
+        "rgnnm": {
+          "title": "Region Name",
+          "format": "string",
+          "description": "Name of the Government Office Region",
+          "example": "South West"
+        },
+        "utlacd": {
+          "title": "Upper Tier Local Authority Code",
+          "format": "string",
+          "description": "ONS code for the county-level authority",
+          "example": "E10000013"
+        },
+        "utlanm": {
+          "title": "Upper Tier Local Authority Name",
+          "format": "string",
+          "description": "Name of the county-level authority",
+          "example": "Gloucestershire"
+        },
+        "ladcd": {
+          "title": "Local Authority District Code",
+          "format": "string",
+          "description": "ONS code for the district-level authority",
+          "example": "E07000079"
+        },
+        "ladnm": {
+          "title": "Local Authority District Name",
+          "format": "string",
+          "description": "Name of the district-level authority",
+          "example": "Cotswold"
+        },
+        "lad20cd": {
+          "title": "2020 Boundaries LAD Code",
+          "format": "string",
+          "description": "Local Authority District code reflecting 2020 boundary definitions",
+          "example": "E07000079"
+        },
+        "lad20nm": {
+          "title": "2020 Boundaries LAD Name",
+          "format": "string",
+          "description": "Local Authority District name reflecting 2020 boundary definitions",
+          "example": "Cotswold"
+        },
+        "ladcd_active": {
+          "title": "Active LAD Code",
+          "format": "string",
+          "description": "Currently active Local Authority District code",
+          "example": "E07000079"
+        },
+        "ladnm_active": {
+          "title": "Active LAD Name",
+          "format": "string",
+          "description": "Currently active Local Authority District name",
+          "example": "Cotswold"
+        },
+        "areacode": {
+          "title": "Focal Area Code",
+          "format": "string",
+          "description": "ONS code for the specific geographic unit this record represents",
+          "example": "E05010701"
+        },
+        "areaname": {
+          "title": "Focal Area Name",
+          "format": "string",
+          "description": "Name of the specific geographic unit this record represents",
+          "example": "Chedworth & Churn Valley"
+        },
+        "areatype": {
+          "title": "Area Type",
+          "format": "string",
+          "description": "Level of geography represented by the focal area",
+          "example": "ward"
+        },
+        "latitude": {
+          "title": "Latitude",
+          "format": "string",
+          "description": "WGS84 latitude coordinate (only present for ward-level records)",
+          "example": "51.792919"
+        },
+        "longitude": {
+          "title": "Longitude",
+          "format": "string",
+          "description": "WGS84 longitude coordinate (only present for ward-level records)",
+          "example": "-1.95872"
+        }
+      }
+    },
+    "Programme": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "title": "Identifier",
+          "format": "string",
+          "description": "The identifier for the programme. Can be generated internally to this dataset"
+        },
+        "title": {
+          "title": "Title",
+          "format": "string",
+          "description": "The title for the programme. Should be recognisable as a \"fund\", a grant programme, or a scheme for procurement"
+        },
+        "description": {
+          "title": "Description",
+          "format": "string",
+          "description": "The description for the programme where available"
+        },
+        "uri": {
+          "title": "URI",
+          "type": "string",
+          "format": "uri",
+          "description": "A URI pointing to more information on the programme, where available"
+        }
+      }
+    },
+    "Value": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "title": "Amount",
+          "type": "number",
+          "description": "The monetary amount"
+        },
+        "currency": {
+          "title": "Currency",
+          "type": "string",
+          "description": "The currency code for the amount, to support cases where amounts were awarded in non-GBP currencies",
+          "enum": [
+            "ADP",
+            "AED",
+            "AFA",
+            "AFN",
+            "ALK",
+            "ALL",
+            "AMD",
+            "ANG",
+            "AOA",
+            "AOK",
+            "AON",
+            "AOR",
+            "ARA",
+            "ARP",
+            "ARS",
+            "ARY",
+            "ATS",
+            "AUD",
+            "AWG",
+            "AYM",
+            "AZM",
+            "AZN",
+            "BAD",
+            "BAM",
+            "BBD",
+            "BDT",
+            "BEC",
+            "BEF",
+            "BEL",
+            "BGJ",
+            "BGK",
+            "BGL",
+            "BGN",
+            "BHD",
+            "BIF",
+            "BMD",
+            "BND",
+            "BOB",
+            "BOP",
+            "BOV",
+            "BRB",
+            "BRC",
+            "BRE",
+            "BRL",
+            "BRN",
+            "BRR",
+            "BSD",
+            "BTN",
+            "BUK",
+            "BWP",
+            "BYB",
+            "BYN",
+            "BYR",
+            "BZD",
+            "CAD",
+            "CDF",
+            "CHC",
+            "CHE",
+            "CHF",
+            "CHW",
+            "CLF",
+            "CLP",
+            "CNY",
+            "COP",
+            "COU",
+            "CRC",
+            "CSD",
+            "CSJ",
+            "CSK",
+            "CUC",
+            "CUP",
+            "CVE",
+            "CYP",
+            "CZK",
+            "DDM",
+            "DEM",
+            "DJF",
+            "DKK",
+            "DOP",
+            "DZD",
+            "ECS",
+            "ECV",
+            "EEK",
+            "EGP",
+            "ERN",
+            "ESA",
+            "ESB",
+            "ESP",
+            "ETB",
+            "EUR",
+            "FIM",
+            "FJD",
+            "FKP",
+            "FRF",
+            "GBP",
+            "GEK",
+            "GEL",
+            "GHC",
+            "GHP",
+            "GHS",
+            "GIP",
+            "GMD",
+            "GNE",
+            "GNF",
+            "GNS",
+            "GQE",
+            "GRD",
+            "GTQ",
+            "GWE",
+            "GWP",
+            "GYD",
+            "HKD",
+            "HNL",
+            "HRD",
+            "HRK",
+            "HTG",
+            "HUF",
+            "IDR",
+            "IEP",
+            "ILP",
+            "ILR",
+            "ILS",
+            "INR",
+            "IQD",
+            "IRR",
+            "ISJ",
+            "ISK",
+            "ITL",
+            "JMD",
+            "JOD",
+            "JPY",
+            "KES",
+            "KGS",
+            "KHR",
+            "KMF",
+            "KPW",
+            "KRW",
+            "KWD",
+            "KYD",
+            "KZT",
+            "LAJ",
+            "LAK",
+            "LBP",
+            "LKR",
+            "LRD",
+            "LSL",
+            "LSM",
+            "LTL",
+            "LTT",
+            "LUC",
+            "LUF",
+            "LUL",
+            "LVL",
+            "LVR",
+            "LYD",
+            "MAD",
+            "MDL",
+            "MGA",
+            "MGF",
+            "MKD",
+            "MLF",
+            "MMK",
+            "MNT",
+            "MOP",
+            "MRO",
+            "MRU",
+            "MTL",
+            "MTP",
+            "MUR",
+            "MVQ",
+            "MVR",
+            "MWK",
+            "MXN",
+            "MXP",
+            "MXV",
+            "MYR",
+            "MZE",
+            "MZM",
+            "MZN",
+            "NAD",
+            "NGN",
+            "NIC",
+            "NIO",
+            "NLG",
+            "NOK",
+            "NPR",
+            "NZD",
+            "OMR",
+            "PAB",
+            "PEH",
+            "PEI",
+            "PEN",
+            "PES",
+            "PGK",
+            "PHP",
+            "PKR",
+            "PLN",
+            "PLZ",
+            "PTE",
+            "PYG",
+            "QAR",
+            "RHD",
+            "ROK",
+            "ROL",
+            "RON",
+            "RSD",
+            "RUB",
+            "RUR",
+            "RWF",
+            "SAR",
+            "SBD",
+            "SCR",
+            "SDD",
+            "SDG",
+            "SDP",
+            "SEK",
+            "SGD",
+            "SHP",
+            "SIT",
+            "SKK",
+            "SLL",
+            "SOS",
+            "SRD",
+            "SRG",
+            "SSP",
+            "STD",
+            "STN",
+            "SUR",
+            "SVC",
+            "SYP",
+            "SZL",
+            "THB",
+            "TJR",
+            "TJS",
+            "TMM",
+            "TMT",
+            "TND",
+            "TOP",
+            "TPE",
+            "TRL",
+            "TRY",
+            "TTD",
+            "TWD",
+            "TZS",
+            "UAH",
+            "UAK",
+            "UGS",
+            "UGW",
+            "UGX",
+            "USD",
+            "USN",
+            "USS",
+            "UYI",
+            "UYN",
+            "UYP",
+            "UYU",
+            "UZS",
+            "VEB",
+            "VEF",
+            "VES",
+            "VNC",
+            "VND",
+            "VUV",
+            "WST",
+            "XAF",
+            "XAG",
+            "XAU",
+            "XBA",
+            "XBB",
+            "XBC",
+            "XBD",
+            "XCD",
+            "XDR",
+            "XEU",
+            "XFO",
+            "XFU",
+            "XOF",
+            "XPD",
+            "XPF",
+            "XPT",
+            "XRE",
+            "XSU",
+            "XTS",
+            "XUA",
+            "XXX",
+            "YDD",
+            "YER",
+            "YUD",
+            "YUM",
+            "YUN",
+            "ZAL",
+            "ZAR",
+            "ZMK",
+            "ZMW",
+            "ZRN",
+            "ZRZ",
+            "ZWC",
+            "ZWD",
+            "ZWL",
+            "ZWN",
+            "ZWR"
+          ]
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ]
+    },
+    "Activity": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "title": "Title",
+          "description": "The title of the activity, likely taken from the title of the grant or procurement"
+        },
+        "description": {
+          "type": "string",
+          "title": "Description",
+          "description": "The description of the activity, likely taken from the description of the grant or procurement"
+        },
+        "classifications": {
+          "type": "array",
+          "title": "Classifications",
+          "description": "A list of classifications used to describe this activity",
+          "items": {
+            "$ref": "#/$defs/Classification"
+          }
+        },
+        "location": {
+          "$ref": "#/$defs/Location"
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": {
+      "title": "Identifier",
+      "type": "string",
+      "description": "Unique identifier for this funding opportunity. For data converted from 360Giving, use the .id field. For data converted from OCDS, use the .ocid field.",
+      "example": "fundglos-0001"
+    },
+    "type": {
+      "title": "Funding Opportunity Type",
+      "type": "string",
+      "description": "What type of funding this is, i.e. a grant or a procurement suitable for vcses",
+      "enum": [
+        "grant",
+        "procurement"
+      ],
+      "example": "grant"
+    },
+    "date": {
+      "title": "Date",
+      "type": "string",
+      "description": "The date of the funding award. In the case of grants, this is the date awarded. In the case of procurements, this is the date of the award",
+      "oneOf": [
+        {
+          "format": "date"
+        },
+        {
+          "format": "date-time"
+        }
+      ]
+    },
+    "uri": {
+      "title": "URI",
+      "type": "string",
+      "format": "uri",
+      "description": "A URI which points to more information about this opportunity"
+    },
+    "programme": {
+      "$ref": "#/$defs/Programme"
+    },
+    "activity": {
+      "$ref": "#/$defs/Activity"
+    }
+  }
+}
