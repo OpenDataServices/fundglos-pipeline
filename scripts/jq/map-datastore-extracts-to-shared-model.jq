@@ -21,8 +21,9 @@ def transform_organisation($org_data; $location_data):
 		    name: $org.name,
 		    location: $location,
 		    additionalIdentifiers: [
-		    	($org.charityNumber | select(. != null) | {id: "GB-CHC-\(.)",identifier: ., scheme: "GB-CHC"}),
-			($org.companyNumber | select(. != null) | {id: "GB-COH-\(.)",identifier: ., scheme: "GB-COH"})
+		    # Need to add a clause for != "NULL" because some source data contains "NULL" as an actual value for the .charityNumber field…
+		    	($org.charityNumber | select(. != null and . != "NULL") | {id: "GB-CHC-\(.)",identifier: ., scheme: "GB-CHC"}),
+			($org.companyNumber | select(. != null and . != "NULL") | {id: "GB-COH-\(.)",identifier: ., scheme: "GB-COH"})
 		    ]
 		} 
 	

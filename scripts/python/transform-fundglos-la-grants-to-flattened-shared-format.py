@@ -48,6 +48,20 @@ def fy_map(row):
         return ''
 
 
+def generate_gb_chc_identifier(value):
+    """
+    Given an input, generates a GB-CHC-{value} prefix to use as an identifier, if the input is not empty
+    """
+
+    # Some orgs are identified with their GB-MPR identifiers which can begin with "IP"
+    if str(value).startswith("IP"):
+        return f"GB-MPR-{value}".replace(".0","")
+
+    if pd.notna(value) and str(value).strip() != "":
+        return f"GB-CHC-{value}".replace(".0", "") # This is added because pandas sometimes treats identifier strings as numbers and we get a ".0" at the end of the identifier string
+
+    return ""
+
 def generate_recipient_id(row):
     """
     Generates a recipient id to meet the schema, based on the funder name and the recipient name
@@ -423,7 +437,7 @@ dean_DC_funding = {
     "funder/identifier/id": ["GB-GOR-FOE"] * len(dean_DC),
     "funder/identifier/scheme": ["GB-GOR"] * len(dean_DC),
     "funder/identifier/identifier":["FOE"] * len(dean_DC),
-    "recipient/id":	dean_DC['Charity Number'],
+    "recipient/id":	dean_DC['Charity Number'].apply(lambda x: generate_gb_chc_identifier(x)),
     "recipient/name": dean_DC['Beneficiary'],	
     "recipient/location/ewcd":'',	
     "recipient/location/ewnm":	'',
@@ -523,7 +537,7 @@ cotswold_DC_funding = {
     "funder/identifier/id": ["GB-GOR-COT"] * len(cotswold_DC),
     "funder/identifier/scheme": ["GB-GOR"] * len(cotswold_DC),
     "funder/identifier/identifier":["COT"] * len(cotswold_DC),
-    "recipient/id": cotswold_DC['Charity No'],
+    "recipient/id": cotswold_DC['Charity No'].apply(lambda x: generate_gb_chc_identifier(x)),
     "recipient/name": cotswold_DC['Beneficiary'],	
     "recipient/location/ewcd":'',	
     "recipient/location/ewnm":	'',
@@ -727,7 +741,7 @@ tewkesbury_BC_funding = {
     "funder/identifier/id": ["GB-GOR-TEW"] * len(tewkesbury_BC),
     "funder/identifier/scheme": ["GB-GOR"] * len(tewkesbury_BC),
     "funder/identifier/identifier":["TEW"] * len(tewkesbury_BC),
-    "recipient/id":	tewkesbury_BC['Registration Number/Charity Number'],
+    "recipient/id":	tewkesbury_BC['Registration Number/Charity Number'].apply(lambda x: generate_gb_chc_identifier(x)),
     "recipient/name": tewkesbury_BC['Beneficiary'],	
     "recipient/location/ewcd":'',	
     "recipient/location/ewnm":	'',
@@ -817,6 +831,13 @@ all_data_df['date'] = all_data_df['date'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 # 3. Generate some recipient ids for those who don't have them, as they are a required field:
 
 all_data_df['recipient/id'] = all_data_df.apply(generate_recipient_id, axis=1)
+
+# 4. Create proper identifier objects for those entries where we have a GB-CHC identifier
+
+mask = all_data_df['recipient/id'].str.startswith("GB-CHC", na=False)
+all_data_df.loc[mask, 'recipient/identifier/id'] = all_data_df.loc[mask, 'recipient/id']
+all_data_df.loc[mask, 'recipient/identifier/scheme'] = "GB-CHC"
+all_data_df.loc[mask, 'recipient/identifier/identifier'] = all_data_df.loc[mask, 'recipient/id'].str.split("-").str[-1]
 
 # Here we pass csv.QUOTE_ALL to enforce quoting of every column, otherwise the resulting file is very messy with strings spanning lots of columns.
 
