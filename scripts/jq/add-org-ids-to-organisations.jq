@@ -19,12 +19,15 @@
 # We do the same processing twice, once for recipients and once for funders.
 
 if (.recipient.name != "Recipient Individual" and (.recipient.identifier == null or .recipient.identifier.scheme != "GB-CHC")) then
-	# Lookup the org ID using the name (convert to uppercase to match the lookup file)
-	$lookup[.recipient.name | ascii_upcase] as $org_id |
+	# Lookup the org ID using the name (convert to uppercase to match the lookup file, remove any spaces)
+	$lookup[.recipient.name | ascii_upcase | rtrimstr(" ")] as $org_id |
 
 	if $org_id != null then
 		# Build the GB-CHC identifier using the found data
 		.recipient.identifier += {id: $org_id, scheme: "GB-CHC", identifier: ($org_id | split("-")[-1])} 
+		
+		# Set the .recipient.id field to be equal to our shiny new identifier, for convenience/cleanliness
+		| .recipient.id = .recipient.identifier.identifier
 	else
 		# No match found, leave intact
 		.

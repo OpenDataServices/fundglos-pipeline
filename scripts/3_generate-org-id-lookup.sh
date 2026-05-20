@@ -28,7 +28,7 @@ fi
 # Get the list of unique org names. Use tr to convert to uppercase
 echo "Generating list of unique org names from mapped data…"
 
-cat "$mapped_funding_data_directory/"*.jsonl | jq -r '.recipient.name, .funder.name' | tr '[:lower:]' '[:upper:]' | sort --unique > "$list_of_unique_org_names_file"
+cat "$mapped_funding_data_directory/"*.jsonl | jq -r '(.recipient.name | rtrimstr(" ")), (.funder.name | rtrimstr(" "))' | tr '[:lower:]' '[:upper:]' | sort --unique > "$list_of_unique_org_names_file"
 
 
 # Generate org-id lookup CSV files from various sources
@@ -57,7 +57,17 @@ echo "name,org_id" > "$mapped_data_org_id_csv_file"
 
 cat "$mapped_funding_data_directory"/*.jsonl | jq --raw-output --from-file "$mapped_data_org_id_extraction_filter" | tr '[:lower:]' '[:upper:]' | sort --unique >> "$mapped_data_org_id_csv_file" ## append, not overwrite
 
+
+# Copy Fundglos' org-ids spreadsheet to here
+echo "Copying Fundglos' handcrafted org-id to name mapping sheet…"
+
+fundglos_org_id_mapping_file="./pipeline/source_data/fundglos/fundglos-org-id-mapping.csv"
+
+cp "$fundglos_org_id_mapping_file" "./pipeline/intermediate_data/organisation-identifiers/fundglos-org-id-mapping.csv"
+
 # If you need to process other sources of org-ids, put them here :-) Aim to get a csv file where the name of the organisation is in UPPERCASE and the csv has the headers of "name" and "org_id" **in that order** so that the final stage can just hoover it all up using csvstack
+
+
 
 # Final Stage
 # ====================

@@ -58,6 +58,15 @@ fundglos_gcf_summerfield_url="https://docs.google.com/spreadsheets/d/16lCoPYNAVu
 curl -L "$fundglos_gcf_summerfield_url" -o "$fundglos_dir/gcf-summerfield-grants.csv"
 
 
+# Format for CSV exports is /export?format=csv&gid={gid from URL of tab}
+fundglos_org_id_mapping_url="https://docs.google.com/spreadsheets/d/1fw04HH31VayMgFlJPPzjAzwLlBfKuqrWm1goEfhsWzI/export?format=csv&gid=977674719"
+
+curl -L "$fundglos_org_id_mapping_url" -o "$fundglos_dir/fundglos-org-id-mapping.csv"
+
+fundglos_classification_mapping_url="https://docs.google.com/spreadsheets/d/1fw04HH31VayMgFlJPPzjAzwLlBfKuqrWm1goEfhsWzI/export?format=csv&gid=38613526"
+
+curl -L "$fundglos_classification_mapping_url" -o "$fundglos_dir/fundglos-org-id-uk-cat-mappings.csv"
+
 # Fetch Threesixty Giving Datastore data
 # ===========================================
 # 
