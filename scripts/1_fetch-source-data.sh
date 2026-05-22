@@ -6,11 +6,12 @@
 
 
 cc_dir="pipeline/source_data/charity-commission"
+coh_dir="pipeline/source_data/companies-house"
 ukcat_dir="pipeline/source_data/uk-cat"
 fundglos_dir="pipeline/source_data/fundglos"
 threesixty_dir="pipeline/source_data/threesixtygiving-datastore"
 
-mkdir -p $cc_dir $ukcat_dir $fundglos_dir $threesixty_dir
+mkdir -p $cc_dir $ukcat_dir $fundglos_dir $threesixty_dir $coh_dir
 
 
 # Fetch Charity Commission Data
@@ -23,7 +24,22 @@ echo "Fetching Charity Commission datafile of charity data…"
 
 curl "https://ccewuksprdoneregsadata1.blob.core.windows.net/data/json/publicextract.charity.zip" > "$cc_dir/gb-chc-data.zip"
 
-unzip "$cc_dir/gb-chc-data.zip" -d "$cc_dir"
+unzip -p "$cc_dir/gb-chc-data.zip" > "$cc_dir/gb-chc-identifiers.json"
+
+
+# Fetch Companies House Data
+# ==============================
+# https://download.companieshouse.gov.uk/en_output.html
+
+# TODO: scrape the actual web page to find the latest download link.
+# The companies house data is really unhelpful, because the latest download is not aliased as "latest", meaning you need the exact url.
+# At the moment, we've just used the 2026-05-01 link, for expedience
+
+echo "Fetching Companies House datafile of Companies data…"
+
+curl "https://download.companieshouse.gov.uk/BasicCompanyDataAsOneFile-2026-05-01.zip" > "$coh_dir/gb-coh-data.zip"
+
+unzip -p "$coh_dir/gb-coh-data.zip" > "$coh_dir/gb-coh-identifiers.csv"
 
 
 # Fetch UK-CAT data

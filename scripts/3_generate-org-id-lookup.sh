@@ -39,11 +39,22 @@ cat "$mapped_funding_data_directory/"*.jsonl | jq -r '(.recipient.name | rtrimst
 
 echo "Converting the Charity Commission data file into a CSV lookup…"
 
-charity_commission_datafile="./pipeline/source_data/charity-commission/publicextract.charity.json"
+charity_commission_datafile="./pipeline/source_data/charity-commission/gb-chc-identifiers.json"
 charity_commission_conversion_filter="./scripts/jq/charity-commission-to-org-id-csv-file.jq"
 charity_commission_org_id_csv_file="./pipeline/intermediate_data/organisation-identifiers/charity-commission-identifiers.csv"
 
 jq --raw-output --from-file "$charity_commission_conversion_filter" "$charity_commission_datafile" | csvgrep --columns "name" --file "$list_of_unique_org_names_file" > "$charity_commission_org_id_csv_file"
+
+# Convert the Companies House data file to a CSV file matching the format of the Charity Commission one. Similarly, filtering is done to reduce size from >185,000 rows to approximately 1,000
+
+echo "Converting the Companies House data file into a CSV lookup…"
+
+companies_house_datafile="./pipeline/source_data/companies-house/gb-coh-identifiers.csv"
+companies_house_queryfile="./scripts/sql/convert-gb-coh-identifier-list-to-shared-format.sql"
+companies_house_org_id_csv_file="./pipeline/intermediate_data/organisation-identifiers/companies-house-identifiers.csv"
+
+csvgrep --columns "CompanyName" --file "$list_of_unique_org_names_file" "$companies_house_datafile" | csvsql --query "$companies_house_queryfile" > "$companies_house_org_id_csv_file"
+
 
 # Get a list of org-ids from our own dataset. No filtering needed because all orgs are, by their nature, in the dataset already.
 
@@ -68,7 +79,6 @@ cp "$fundglos_org_id_mapping_file" "./pipeline/intermediate_data/organisation-id
 # If you need to process other sources of org-ids, put them here :-) Aim to get a csv file where the name of the organisation is in UPPERCASE and the csv has the headers of "name" and "org_id" **in that order** so that the final stage can just hoover it all up using csvstack
 
 
-
 # Final Stage
 # ====================
 
@@ -81,6 +91,7 @@ echo "Combining all CSV lookups into a single file, removing duplicate rows…"
 csvstack "./pipeline/intermediate_data/organisation-identifiers"/*.csv | csvsql --query "SELECT DISTINCT * FROM stdin;" > "$combined_data_org_id_csv_file"
 
 echo "Converting combined CSV lookup into a JSONL file for enriching funding data…"
+org_id_lookup_jq_filter="./scripts/jq/org-ids-to-org-id-lookup.jq"
 jsonl_lookup_file="./pipeline/intermediate_data/organisation-identifiers/org-id-lookup.jsonl"
 
-csvjson "$combined_data_org_id_csv_file" | jq --compact-output '.[]' > "$jsonl_lookup_file"
+csvjson "$combined_data_org_id_csv_file" | jq --compact-output '.[] | select(.org_id != null)' | jq --compact-output --slurp --from-file "$org_id_lookup_jq_filter" > "$jsonl_lookup_file"

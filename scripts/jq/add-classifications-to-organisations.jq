@@ -32,8 +32,3 @@ def get_classifications($org; $lookup):
 
 | .recipient.classifications += get_classifications(.recipient; $lookup)
 | .funder.classifications += get_classifications(.funder; $lookup)
-
-# Original query; limited to looking at .id
-#($classifications | map({key: .org_id, value: .classifications}) | from_entries) as $lookup 
-#| .recipient.classifications += ($lookup[.recipient.id] // []) 
-#| .funder.classifications += ($lookup[.funder.id] // [])
