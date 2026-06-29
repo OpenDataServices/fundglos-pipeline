@@ -93,8 +93,10 @@ jobs:
       
       # Step 9: Commit and push
       - name: Commit and push changes
-        uses: step-security/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update generated data [skip ci]"
-          # Adjust file pattern to match what you generate
-          file_pattern: "funding-data.jsonl"
+        run : |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Github Actions"
+          git add funding-data.jsonl
+          git commit -m "funding-data.jsonl: autoupdate funding-data.jsonl" || echo "No changes to commit"
+          git push
+
