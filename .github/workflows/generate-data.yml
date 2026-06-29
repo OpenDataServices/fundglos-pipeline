@@ -1,0 +1,98 @@
+name: Run Pipeline
+
+env:
+  PGDATABASE: ${{ secrets.PGDATABASE }}
+  PGHOST: ${{ secrets.PGHOST }}
+  PGUSER: ${{ secrets.PGUSER }}
+  PGPASSFILE: ${{ secrets.PGPASSFILE }}
+
+on:
+  # Run on your schedule
+  schedule:
+    - cron: '0 0 1 * *'  # Adjust to your needs
+  # Manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  generate-data:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+
+      # Step 1: Check out your repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Step 2: Install required software (customize this!)
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          # Example: install a special tool
+          sudo apt-get install -y jq curl csvkit python3-pandas unzip postgresql-client
+          # If you need a specific tool not in apt, download it here
+          # wget https://example.com/special-tool -O /usr/local/bin/special-tool
+          # chmod +x /usr/local/bin/special-tool
+      
+      # Step 3: Set up language runtimes (if needed)
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # Step 4: Install language-specific dependencies
+      - name: Install Python dependencies
+        run: |
+          # If you have a requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          fi
+          # Or install specific packages
+          # pip install pandas requests
+      
+     
+      # Step 5: Set up environment variables (if any)
+      - name: Configure environment
+        run: |
+          # For public data - set directly
+          #echo "ENV_VAR_NAME=value" >> $GITHUB_ENV
+          echo "${{secrets.PGPASS}}" > $PGPASSFILE
+      
+      # Step 6: Make your scripts executable
+      - name: Make scripts executable
+        run: |
+          # Make ALL bash scripts executable
+          chmod +x scripts/*.sh
+          # Or specific ones
+          # chmod +x scripts/main_script.sh scripts/helper.sh
+      
+      # Step 7: RUN YOUR SCRIPTS
+      - name: Generate data
+        run: |
+          # Run your main script
+          ./scripts/1_fetch-source-data.sh
+          ./scripts/2_transform-source-data-to-shared-format.sh
+          ./scripts/3_generate-org-id-lookup.sh
+          ./scripts/4_enrich-mapped-data-with-org-ids.sh
+          ./scripts/5_generate-classifications-lookup.sh
+          ./scripts/6_enrich-data-with-classifications.sh
+          ./scripts/7_export-and-flatten-enriched-data.sh
+      
+      # Step 8: Verify data was generated
+      - name: Check generated files
+        run: |
+          # Test generated file (helps with debugging)
+          test -f pipeline/output_data/funding-data.jsonl && echo "funding-data.jsonl created" || echo "Error creating funding-data.jsonl"
+
+          # Copy it to the repo root, since the pipeline folder is in .gitignore
+          cp pipeline/output_data/funding-data.jsonl ./funding-data.jsonl
+      
+      # Step 9: Commit and push
+      - name: Commit and push changes
+        uses: step-security/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update generated data [skip ci]"
+          # Adjust file pattern to match what you generate
+          file_pattern: "funding-data.jsonl"
