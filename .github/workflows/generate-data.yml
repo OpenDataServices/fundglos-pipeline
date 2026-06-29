@@ -59,6 +59,7 @@ jobs:
           # For public data - set directly
           #echo "ENV_VAR_NAME=value" >> $GITHUB_ENV
           echo "${{secrets.PGPASS}}" > $PGPASSFILE
+          chmod 0600 $PGPASSFILE
       
       # Step 6: Make your scripts executable
       - name: Make scripts executable
