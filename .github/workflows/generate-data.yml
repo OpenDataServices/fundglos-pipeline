@@ -51,7 +51,7 @@ jobs:
           fi
           # Or install specific packages
           pip install pandas
-          pip install flatten-tool
+          pip install flattentool
       
      
       # Step 5: Set up environment variables (if any)
