@@ -31,7 +31,7 @@ jobs:
         run: |
           sudo apt-get update
           # Example: install a special tool
-          sudo apt-get install -y jq curl csvkit python3-pandas unzip postgresql-client
+          sudo apt-get install -y jq curl csvkit python3-pandas unzip postgresql-client pipx
           # If you need a specific tool not in apt, download it here
           # wget https://example.com/special-tool -O /usr/local/bin/special-tool
           # chmod +x /usr/local/bin/special-tool
@@ -50,7 +50,8 @@ jobs:
             pip install -r requirements.txt
           fi
           # Or install specific packages
-          # pip install pandas requests
+          pip install pandas
+          pipx install flatten-tool
       
      
       # Step 5: Set up environment variables (if any)
