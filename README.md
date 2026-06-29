@@ -33,6 +33,7 @@ You should have the following packages in your environment:
 * curl
 * python3
   * pandas
+* flatten-tool
 
 ### Datastore Access
 
