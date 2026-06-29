@@ -53,7 +53,7 @@ csvgrep --columns "org_id" --file "$dataset_org_id_file" "$icnptso_mapping_file"
 # Getting NCVO Income Classifications from the Charity Commission file
 # ======================================================================
 
-charity_commission_source_data="pipeline/source_data/charity-commission/publicextract.charity.json"
+charity_commission_source_data="pipeline/source_data/charity-commission/gb-chc-identifiers.json"
 charity_commission_jq_filter_file="scripts/jq/charity-commission-to-ncvo-income-classifications.jq"
 
 # The jq filter wrangles the charity commission data into the correct shape of CSV, and then we use csvgrep to filter it for org-ids we have. Technically it's possible to do the filtering stage with jq but the syntax is messier and it represents another lookup which might be expensive.
