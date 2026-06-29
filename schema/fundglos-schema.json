@@ -39,13 +39,13 @@
       "properties": {
         "id": {
           "type": "string",
-          "title": "",
-          "description": ""
+          "title": "ID",
+          "description": "The full identifier for the organisation taken from scheme + identifier"
         },
         "identifier": {
           "type": "string",
-          "title": "",
-          "description": ""
+          "title": "Identifier",
+          "description": "The identifier for the organisation under the selected scheme"
         },
         "scheme": {
           "type": "string",
@@ -55,8 +55,8 @@
         },
         "uri": {
           "type": "string",
-          "title": "",
-          "description": "",
+          "title": "URI",
+          "description": "A URI pointing to more information about the organisation identifier scheme",
           "format": "uri"
         }
       },
