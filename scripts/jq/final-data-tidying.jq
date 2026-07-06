@@ -26,3 +26,6 @@ walk(if type == "object" then map_values(select(. != null)) else . end)
 	else
 	  . # Leave intact if no match
 end
+
+# Add timezone info to missing dates. This covers cases where the dashboard complains that some dates are invalid
+| .date |= if test("T") then . else . + "T00:00:00+00:00" end
